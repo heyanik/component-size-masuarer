@@ -1,0 +1,36 @@
+{
+    "manifest_version": 2,
+    "name": "Component Size Measurer",
+    "version": "1.0",
+    "description": "Measure component sizes on webpages",
+    "permissions": [
+      "activeTab",
+      "storage"
+    ],
+    "browser_action": {
+      "default_popup": "popup.html",
+      "default_icon": {
+        "16": "icons/icon1.png",
+        "48": "icons/icon2.png",
+        "128": "icons/icon3.png"
+      }
+    },
+    "content_scripts": [
+      {
+        "matches": ["<all_urls>"],
+        "js": ["content.js"],
+        "run_at": "document_idle"
+      }
+    ],
+    "icons": {
+      "16": "icons/icon1.png",
+      "48": "icons/icon2.png",
+      "128": "icons/icon3.png"
+    },
+    "permissions": [
+        "activeTab",
+        "storage",
+        "<all_urls>"
+      ]
+  }
+  
