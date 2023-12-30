@@ -30,7 +30,7 @@ body {
 }
 
 .start:hover {
-  background-color: #45a049;
+  background-color: #45a04984;
 }
 
 /* Stop button */
@@ -39,6 +39,15 @@ body {
   color: white;
 }
 
+.clear {
+  background-color: #0925dc;
+  color: #fff;
+}
+
+.clear:hover {
+  background-color: #0925dc80;
+}
+
 .stop:hover {
-  background-color: #d32f2f;
+  background-color: #d32f2f83;
 }

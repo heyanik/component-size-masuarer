@@ -1,17 +1,11 @@
 let isMeasuring = false;
 let selectedColor = "#f91432"; // Default color
 let outlineWidth = 2; // Default outline width
-let outlineElement = null;
-let sizeLabel = null;
+let outlineElements = [];
+let sizeLabels = [];
 
 function createOutline(startX, startY, width, height) {
-  if (outlineElement) {
-    outlineElement.remove(); // Remove the previous outline element
-    if (sizeLabel) sizeLabel.remove(); // Remove the size label if exists
-  }
-
-  outlineElement = document.createElement("div");
-  outlineElement.id = "extensionOutline"; // Set a unique ID for the outline
+  let outlineElement = document.createElement("div");
   outlineElement.style.position = "absolute";
   outlineElement.style.border = `${outlineWidth}px dashed ${selectedColor}`;
   outlineElement.style.pointerEvents = "none";
@@ -22,19 +16,14 @@ function createOutline(startX, startY, width, height) {
   outlineElement.style.height = height + "px";
 
   document.body.appendChild(outlineElement);
+  outlineElements.push(outlineElement);
 
-  if (sizeLabel) {
-    createSizeLabel(outlineElement.offsetWidth, outlineElement.offsetHeight);
-  }
+  let sizeLabel = createSizeLabel(outlineElement, width, height);
+  sizeLabels.push(sizeLabel);
 }
 
-// Function to prevent text selection during measurement
-function preventTextSelection(event) {
-  event.preventDefault();
-}
-
-function createSizeLabel(width, height) {
-  sizeLabel = document.createElement("div");
+function createSizeLabel(outlineElement, width, height) {
+  let sizeLabel = document.createElement("div");
   sizeLabel.style.position = "absolute";
   sizeLabel.style.color = selectedColor;
   sizeLabel.style.zIndex = "9999"; // Set a high z-index to ensure it appears above other elements
@@ -44,18 +33,12 @@ function createSizeLabel(width, height) {
   sizeLabel.textContent = `${width}px X ${height}px`;
 
   document.body.appendChild(sizeLabel);
+
+  return sizeLabel;
 }
 
 function stopMeasuring() {
   isMeasuring = false;
-  if (outlineElement) {
-    outlineElement.remove();
-    outlineElement = null;
-  }
-  if (sizeLabel) {
-    sizeLabel.remove();
-    sizeLabel = null;
-  }
 }
 
 document.addEventListener("mousedown", function (event) {
@@ -64,35 +47,42 @@ document.addEventListener("mousedown", function (event) {
   let startX = event.pageX;
   let startY = event.pageY;
 
+  let width = 0;
+  let height = 0;
+
+  createOutline(startX, startY, width, height);
+
   // Prevent text selection during the measurement
   document.addEventListener("selectstart", preventTextSelection);
   document.addEventListener("mousemove", drag);
 
   function drag(event) {
-    if (!isMeasuring) return;
+    width = event.pageX - startX;
+    height = event.pageY - startY;
 
-    let width = event.pageX - startX;
-    let height = event.pageY - startY;
+    outlineElements[outlineElements.length - 1].style.width = width + "px";
+    outlineElements[outlineElements.length - 1].style.height = height + "px";
 
-    createOutline(startX, startY, width, height);
+    sizeLabels[
+      outlineElements.length - 1
+    ].textContent = `${width}px X ${height}px`;
   }
 
   document.addEventListener(
     "mouseup",
     function () {
-      isMeasuring = false;
+      isMeasuring = true; // Allow creating another outline
       document.removeEventListener("mousemove", drag);
       document.removeEventListener("selectstart", preventTextSelection);
-      if (outlineElement) {
-        createSizeLabel(
-          outlineElement.offsetWidth,
-          outlineElement.offsetHeight
-        );
-      }
     },
     { once: true }
   );
 });
+
+// Function to prevent text selection during measurement
+function preventTextSelection(event) {
+  event.preventDefault();
+}
 
 // Listen for messages from the extension popup
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
@@ -105,9 +95,11 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   } else if (request.action === "updateOutlineSettings") {
     selectedColor = request.color || selectedColor;
     outlineWidth = request.size || outlineWidth;
-    if (outlineElement) {
-      outlineElement.style.border = `${outlineWidth}px dashed ${selectedColor}`;
-    }
+    outlineElements.forEach((outline) => {
+      outline.style.border = `${outlineWidth}px dashed ${selectedColor}`;
+    });
+  } else if (request.action === "clearOutlines") {
+    clearAllOutlines();
   }
 });
 
@@ -116,8 +108,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
   colorPicker.addEventListener("input", function () {
     selectedColor = colorPicker.value;
-    if (outlineElement) {
-      outlineElement.style.border = `${outlineWidth}px dashed ${selectedColor}`;
-    }
+    outlineElements.forEach((outline) => {
+      outline.style.border = `${outlineWidth}px dashed ${selectedColor}`;
+    });
   });
 });
+
+function clearAllOutlines() {
+  outlineElements.forEach((outline) => {
+    outline.remove();
+  });
+  sizeLabels.forEach((label) => {
+    label.remove();
+  });
+  outlineElements = [];
+  sizeLabels = [];
+}

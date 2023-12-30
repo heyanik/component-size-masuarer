@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let startButton = document.getElementById("startButton");
   let stopButton = document.getElementById("stopButton");
   let colorInput = document.getElementById("colorInput");
+  let clearButton = document.getElementById("clearButton");
 
   // Function to send a message to start the measurement
   startButton.addEventListener("click", function () {
@@ -16,6 +17,14 @@ document.addEventListener("DOMContentLoaded", function () {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       let activeTab = tabs[0];
       chrome.tabs.sendMessage(activeTab.id, { action: "stopMeasuring" });
+    });
+  });
+
+  // Function to send a message to clear all outlines
+  clearButton.addEventListener("click", function () {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      let activeTab = tabs[0];
+      chrome.tabs.sendMessage(activeTab.id, { action: "clearOutlines" });
     });
   });
 
