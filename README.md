@@ -47,7 +47,9 @@ I didn't upload this to Chrome Store. To be honest I don't have the money to pay
 > [!TIP]
 >Pin the extension to use it regularly.
 
-<mark>If you're going to use it, please don't forget to give the repository a star. It'll motivate me to develop things like this. And also, I can see how many of you're using it.❤️</mark>
+---
+
+>If you're going to use it, please don't forget to give the repository a star. It'll motivate me to develop things like this. And also, I can see how many of you're using it.❤️
 
 ---
 
